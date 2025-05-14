@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+{% block title %} Edit | Profile {% endblock %}
+
+{% block body %}
+    <div class="card mt-3 mb-2">
+        <div class="card-body">
+            <h5 class="card-title">Manage Profile</h5>
+            {{ form_start(profileType) }}
+            <div class="row">
+                <div class="col-md-4">
+                    {{ form_row(profileType.name) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(profileType.email) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(profileType.password.first) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(profileType.password.second) }}
+                </div>
+
+                <div class="col-md-12">
+                    <input type="submit" value="save" class="btn btn-primary">
+                </div>
+            </div>
+            {{ form_end(profileType) }}
+        </div>
+    </div>
+{% endblock %}

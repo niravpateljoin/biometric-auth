@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+{% block title %} Profile {% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Two-Factor authentication settings</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" id="two-factor-auth-form">
+                <div class="form-group">
+                    <label for="2fa">Enable two-factor authentication</label>
+                    <select class="form-control" id="2fa" name="2fa">
+                        <option value="0" {% if not app.user.enable2fa %} selected {% endif %}>No</option>
+                        <option value="1" {% if app.user.enable2fa %} selected {% endif %}>Yes</option>
+                    </select>
+                    <input type="hidden" name="_token" value="{{ csrf_token('manage_two_factor_auth') }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+        <hr>
+        <div class="card-body">
+            <form method="post" id="bio-metrics-auth-form">
+                <div class="form-group">
+                    <label for="2fa">Enable Biometric authentication</label>
+                    <select class="form-control" id="2fa" name="bio_metrics">
+                        <option value="0" {% if not app.user.enableBioMetricsFor2fa %} selected {% endif %}>No</option>
+                        <option value="1" {% if app.user.enableBioMetricsFor2fa %} selected {% endif %}>Yes</option>
+                    </select>
+                    <input type="hidden" name="_token" value="{{ csrf_token('bio_metrics_auth') }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ asset('assets/js/bio_metrics.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('two-factor-auth-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                fetch('{{ path('settings_manage_two_factor_auth') }}', {
+                    method: 'POST',
+                    body: formData
+                }).then((res) => {
+                    return res.json();
+                }).then(response => {
+                    if (response.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Updated Authentication Settings'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.errorMessage
+                        });
+                    }
+                });
+            });
+
+            document.getElementById('bio-metrics-auth-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                if (formData.get('bio_metrics') === '1') {
+                    if (!window.fetch || !navigator.credentials || !navigator.credentials.create) {
+                        window.alert('Browser not supported.');
+                        return;
+                    }
+                    let biometricsDataCreateArgsURL = "{{ path('bio_metrics_create_args') }}";
+                    fetch(biometricsDataCreateArgsURL, {
+                        method: 'POST',
+                        cache: 'no-cache'
+                    }).then((response) => {
+                        return response.json();
+                    }).then((res) => {
+                        if (!res.status) {
+                            throw new Error(res);
+                        }
+                        let createdArgs = res.createdArgs;
+                        return recursiveBase64StrToArrayBuffer(createdArgs);
+                    }).then((createCredentialArgs) => {
+                        return navigator.credentials.create(createCredentialArgs);
+                    }).then((cred) => {
+                        return {
+                            clientDataJSON: cred.response.clientDataJSON  ? arrayBufferToBase64(cred.response.clientDataJSON) : null,
+                            attestationObject: cred.response.attestationObject ? arrayBufferToBase64(cred.response.attestationObject) : null
+                        };
+                    }).then(JSON.stringify).then(function(AuthenticatorAttestationResponse) {
+                        let biometricsDataProcessCreateURL = "{{ path('bio_metrics_process_create') }}";
+                        fetch(biometricsDataProcessCreateURL, {
+                            method: 'POST',
+                            body: AuthenticatorAttestationResponse,
+                            cache: 'no-cache'
+                        }).then((res) => {
+                            return res.json();
+                        }).then((response) => {
+                            if (response.success) {
+                                manageBioMetrics(formData);
+                            }
+                        });
+                    })
+                } else {
+                    manageBioMetrics(formData);
+                }
+            });
+
+            function manageBioMetrics(formData)
+            {
+                fetch('{{ path('settings_manage_bio_metrics') }}', {
+                    method: 'POST',
+                    body: formData
+                }).then((res) => {
+                    return res.json();
+                }).then(response => {
+                    if (response.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Updated Authentication Settings'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.errorMessage
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

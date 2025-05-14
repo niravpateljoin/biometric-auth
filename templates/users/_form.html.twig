@@ -1,0 +1,29 @@
+{{ form_start(userTypeForm) }}
+<div class="row">
+    <div class="col-md-4">
+        {{ form_row(userTypeForm.name) }}
+    </div>
+    <div class="col-md-4">
+        {{ form_row(userTypeForm.email) }}
+    </div>
+    <div class="col-md-4">
+        {{ form_row(userTypeForm.role) }}
+    </div>
+    <div class="col-md-4">
+        {{ form_row(userTypeForm.password.first) }}
+    </div>
+    <div class="col-md-4">
+        {{ form_row(userTypeForm.password.second) }}
+    </div>
+
+    {% if userTypeForm.enabled is defined and userTypeForm.enabled %}
+        <div class="col-md-4">
+            {{ form_row(userTypeForm.enabled) }}
+        </div>
+    {% endif %}
+
+    <div class="col-md-12">
+        <input type="submit" value="submit" class="btn btn-primary">
+    </div>
+</div>
+{{ form_end(userTypeForm) }}

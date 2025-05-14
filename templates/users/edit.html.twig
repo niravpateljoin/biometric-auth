@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+{% set active = 'users' %}
+{% block title %} Edit | Users {% endblock %}
+
+{% block body %}
+    <div class="card mt-3 mb-2">
+        <div class="card-body">
+            <h5 class="card-title">Edit User {{ user.name }}</h5>
+            {{ include('users/_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

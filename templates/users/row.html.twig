@@ -1,0 +1,23 @@
+<tr>
+    <td>{{ user.id }}</td>
+    <td>{{ user.name }}</td>
+    <td>{{ user.email }}</td>
+    <td>
+        <span class="badge rounded-pill  text-white bg-{{ user.enabled ? 'success' : 'danger' }}">{{ user.enabled ? 'Yes' : 'No' }}</span>
+    </td>
+    <td>
+        <span class="badge {{ user.role.badgeClass }}">{{ user.role.readable }}</span>
+    </td>
+    <td>
+        {{ user.createdAt|format('Y-m-d H:i:s') }}
+    </td>
+
+    <td>
+        <a href="{{ path('users_edit', {'id': user.id}) }}" class="text-decoration-none fs-6 text-body" data-bs-toggle="tooltip" data-bs-original-title="Edit">
+            <i class="fa fa-pen"></i>
+        </a>
+        <a href="javascript:void(0)" class="text-decoration-none fs-6 text-danger delete-user-btn" data-user-id="{{ user.id }}" data-email="{{ user.email }}" data-bs-toggle="tooltip" data-bs-original-title="Delete">
+            <i class="fa fa-trash"></i>
+        </a>
+    </td>
+</tr>
